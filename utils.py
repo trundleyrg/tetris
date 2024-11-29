@@ -35,8 +35,8 @@ def draw_cells(canvas, column, row,  block: dict):
     :return:
     """
     for x, y in block["shape"]:
-        ci = y + column
-        ri = x + row
+        ci = x + column
+        ri = y + row
         draw_cell_by_cr(canvas, c=ci, r=ri, color=block["color"])
 
 
