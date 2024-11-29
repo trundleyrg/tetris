@@ -13,10 +13,10 @@ def draw_cell_by_cr(canvas, r, c, color="#CCCCCC"):
     :param color: 方块颜色，默认为#CCCCCC，轻灰色
     :return:
     """
-    x0 = c * cell_size
-    y0 = r * cell_size
-    x1 = c * cell_size + cell_size
-    y1 = r * cell_size + cell_size
+    x0 = c * CELL_SIZE
+    y0 = r * CELL_SIZE
+    x1 = c * CELL_SIZE + CELL_SIZE
+    y1 = r * CELL_SIZE + CELL_SIZE
     canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white", width=2)
 
 
@@ -66,14 +66,14 @@ def draw_block_move(canvas, block, direction=[0, 0]):
 def main():
     # 初始化
     win = tk.Tk()
-    canvas = tk.Canvas(win, width=width, height=height)
+    canvas = tk.Canvas(win, width=WIDTH, height=HEIGHT)
     canvas.pack()
 
-    draw_blank_board(canvas, row=row, column=column)
+    draw_blank_board(canvas, row=ROW, column=COLUMN)
 
     # 生成一个俄罗斯方块
     block_type = random.choice(list(shapes_dict.keys()))
-    loc_x = random.randint(0, column - 1)
+    loc_x = random.randint(0, COLUMN - 1)
     loc_y = 0
     new_block = {
         "block": shapes_dict[block_type],

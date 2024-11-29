@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from config import cell_size
+from config import CELL_SIZE
 from tetris_shape import shapes_dict
 
 
@@ -12,10 +12,10 @@ def draw_cell_by_cr(canvas, r, c, color="#CCCCCC"):
     :param color: 方块颜色，默认为#CCCCCC，轻灰色
     :return:
     """
-    x0 = c * cell_size
-    y0 = r * cell_size
-    x1 = c * cell_size + cell_size
-    y1 = r * cell_size + cell_size
+    x0 = c * CELL_SIZE
+    y0 = r * CELL_SIZE
+    x1 = c * CELL_SIZE + CELL_SIZE
+    y1 = r * CELL_SIZE + CELL_SIZE
     canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white", width=2)
 
 
@@ -46,7 +46,7 @@ def main():
     win = tk.Tk()
     width_cell = 6  # 6个cell
     height_cell = 4 * len(shapes_dict.keys())  # N个格子
-    canvas = tk.Canvas(win, width=6 * cell_size, height=4 * len(shapes_dict.keys()) * cell_size)
+    canvas = tk.Canvas(win, width=6 * CELL_SIZE, height=4 * len(shapes_dict.keys()) * CELL_SIZE)
     canvas.pack()
 
     draw_blank_board(canvas, row=height_cell,  column=width_cell)
