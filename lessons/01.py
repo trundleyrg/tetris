@@ -1,10 +1,17 @@
 import tkinter as tk
 
-from config import *
-from tetris_shape import *
+from config import cell_size
+from tetris_shape import shapes_dict
 
 
-def draw_cell_by_cr(canvas, c, r, color="#CCCCCC"):
+def draw_cell_by_cr(canvas, r, c, color="#CCCCCC"):
+    """
+    :param canvas: 画板，用于绘制一个方块的Canvas对象
+    :param c: 方块所在列
+    :param r: 方块所在行
+    :param color: 方块颜色，默认为#CCCCCC，轻灰色
+    :return:
+    """
     x0 = c * cell_size
     y0 = r * cell_size
     x1 = c * cell_size + cell_size
@@ -12,13 +19,14 @@ def draw_cell_by_cr(canvas, c, r, color="#CCCCCC"):
     canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white", width=2)
 
 
-def draw_blank_board(canvas, column, row):
+def draw_blank_board(canvas, row, column):
+    # 绘制空白面板
     for r_i in range(row):
         for c_i in range(column):
-            draw_cell_by_cr(canvas, c_i, r_i)
+            draw_cell_by_cr(canvas, r_i, c_i)
 
 
-def draw_cells(canvas, row, column, block:dict):
+def draw_cells(canvas, row, column, block: dict):
     """
     绘制指定形状指定颜色的俄罗斯方块
     :param canvas: 画板
@@ -30,17 +38,18 @@ def draw_cells(canvas, row, column, block:dict):
     for x, y in block["shape"]:
         ci = y + column
         ri = x + row
-        draw_cell_by_cr(canvas, ci, ri, block["color"])
+        draw_cell_by_cr(canvas, ri, ci, block["color"])
 
 
 def main():
+    """绘制几种俄罗斯方块的形状"""
     win = tk.Tk()
     width_cell = 6  # 6个cell
-    height_cell = 5 * len(shapes_dict.keys())  # N个格子
+    height_cell = 4 * len(shapes_dict.keys())  # N个格子
     canvas = tk.Canvas(win, width=6 * cell_size, height=4 * len(shapes_dict.keys()) * cell_size)
     canvas.pack()
 
-    draw_blank_board(canvas, width_cell, height_cell)
+    draw_blank_board(canvas, row=height_cell,  column=width_cell)
 
     for i, key in enumerate(shapes_dict.keys()):
         center_x = 3
