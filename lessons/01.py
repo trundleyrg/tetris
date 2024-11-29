@@ -4,7 +4,7 @@ from config import CELL_SIZE
 from tetris_shape import shapes_dict
 
 
-def draw_cell_by_cr(canvas, r, c, color="#CCCCCC"):
+def draw_cell_by_cr(canvas, c, r, color="#CCCCCC"):
     """
     :param canvas: 画板，用于绘制一个方块的Canvas对象
     :param c: 方块所在列
@@ -19,26 +19,26 @@ def draw_cell_by_cr(canvas, r, c, color="#CCCCCC"):
     canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white", width=2)
 
 
-def draw_blank_board(canvas, row, column):
+def draw_blank_board(canvas, column, row):
     # 绘制空白面板
     for r_i in range(row):
         for c_i in range(column):
-            draw_cell_by_cr(canvas, r_i, c_i)
+            draw_cell_by_cr(canvas, c=c_i, r=r_i)
 
 
-def draw_cells(canvas, row, column, block: dict):
+def draw_cells(canvas, column, row,  block: dict):
     """
     绘制指定形状指定颜色的俄罗斯方块
     :param canvas: 画板
-    :param row: 该形状设定的原点所在的行
     :param column: 该形状设定的原点所在的列
+    :param row: 该形状设定的原点所在的行
     :param block: 形状类
     :return:
     """
     for x, y in block["shape"]:
         ci = y + column
         ri = x + row
-        draw_cell_by_cr(canvas, ri, ci, block["color"])
+        draw_cell_by_cr(canvas, c=ci, r=ri, color=block["color"])
 
 
 def main():
