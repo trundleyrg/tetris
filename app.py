@@ -1,95 +1,4 @@
 import tkinter as tk
-from tkinter import messagebox
-import random
-
-
-from utils import *
-
-cell_size = 30
-C = 36
-R = 20
-height = R * cell_size
-width = C * cell_size
-
-GENSPEED = 4
-FPS = 20  # 刷新页面的毫秒间隔
-range_length = 7
-
-# 定义各种形状
-SHAPES = {
-    "O": [(-1, -1), (0, -1), (-1, 0), (0, 0)],
-    "S": [(-1, 0), (0, 0), (0, -1), (1, -1)],
-    "T": [(-1, 0), (0, 0), (0, -1), (1, 0)],
-    "I": [(0, 1), (0, 0), (0, -1), (0, -2)],
-    "L": [(-1, 0), (0, 0), (-1, -1), (-1, -2)],
-    "J": [(-1, 0), (0, 0), (0, -1), (0, -2)],
-    "Z": [(-1, -1), (0, -1), (0, 0), (1, 0)],
-}
-
-# 定义各种形状的颜色
-SHAPESCOLOR = {
-    "O": "#d25b6a",
-    "S": "#d2835b",
-    "T": "#e5e234",
-    "I": "#83d05d",
-    "L": "#2862d2",
-    "J": "#35b1c0",
-    "Z": "#5835c0"
-}
-
-
-class Drawer(tk.Canvas):
-    def __init__(self, master, c, r, cell_size):
-        self.c = c
-        self.r = r
-        self.cell_size = cell_size
-        height = r * cell_size
-        width = c * cell_size
-        super().__init__(master, width=width, height=height)
-        self.pack()
-
-    def init(self):
-        for ri in range(self.r):
-            for ci in range(self.c):
-                self.draw_cell_by_cr(ci, ri, '')
-
-    def draw_cell_by_cr(self, c, r, color, kind=None):
-        x0 = c * cell_size
-        y0 = r * cell_size
-        x1 = c * cell_size + cell_size
-        y1 = r * cell_size + cell_size
-        # 三种类型
-        # 没有俄罗斯方块，None
-        # 失效的俄罗斯方块，dead
-        # 俄罗斯方块，kind 代表第几个
-        if kind is None:
-            self.create_rectangle(x0, y0, x1, y1, fill="#CCCCCC", outline="white", width=2)
-        elif kind == "dead":
-            _tag = 'r%s' % r
-            self.create_rectangle(x0, y0, x1, y1, fill=color, outline="white", width=2, tags=_tag)
-        else:
-            _tag = 'b%s' % kind
-            self.create_rectangle(x0, y0, x1, y1, fill=color, outline="white", width=2, tags=_tag)
-
-    def draw_block(self, block, kind):
-        c, r = block['cr']
-        shape_type = block['kind']
-        cell_list = block['cell_list']
-        for cell in cell_list:
-            cell_c, cell_r = cell
-            ci = cell_c + c
-            ri = cell_r + r
-            # 判断该位置方格在画板内部(画板外部的方格不再绘制)
-            if 0 <= c < C and 0 <= r < R:
-                self.draw_cell_by_cr(ci, ri, SHAPESCOLOR[shape_type], kind)
-
-    def clean_by_block_id(self, block_id):
-        _tag = 'b%s' % block_id
-        self.delete(_tag)
-
-    def clean_by_row(self,r):
-        _tag = 'r%s' % r
-        self.delete(_tag)
 
 
 class GameApp:
@@ -119,10 +28,10 @@ class GameApp:
         self.count = 0
 
     def init_board(self):
-        self.board=[
+        self.board = [
             ['' for ci in range(self.c)] for ri in range(self.r)
         ]
-        self.future_board=[
+        self.future_board = [
             ['' for ci in range(self.c)] for ri in range(self.r)
         ]
 
@@ -134,7 +43,7 @@ class GameApp:
                 # 当前行可消除
                 if ri > 0:
                     for cur_ri in range(ri, 0, -1):
-                        self.board[cur_ri] = self.board[cur_ri-1][:]
+                        self.board[cur_ri] = self.board[cur_ri - 1][:]
                     self.board[0] = ['' for j in range(C)]
                 else:
                     self.board[ri] = ['' for j in range(C)]
@@ -152,7 +61,6 @@ class GameApp:
             self.win.title("SCORES: %s" % self.score)
 
     def game_loop(self):
-        """循环主题，生成并移动"""
         if self.running:
             self.win.update()
 
@@ -167,7 +75,6 @@ class GameApp:
             self.win.after(self.fps, self.game_loop)
 
     def run(self):
-        """函数主体"""
         self.game_loop()
         self.win.mainloop()
 
@@ -226,7 +133,7 @@ class GameApp:
                 'cell_list': SHAPES['S'],
                 'cr': cr
             }
-        elif self.block_id ==1:
+        elif self.block_id == 1:
             new_block = {
                 'kind': 'I',  # 对应俄罗斯方块的类型
                 'cell_list': SHAPES['I'],
@@ -256,7 +163,7 @@ class GameApp:
         return True
 
     def get_bottom_r(self, cell_list, ci):
-        for ri in range(R-1, -1, -1):
+        for ri in range(R - 1, -1, -1):
             if self.check_move((ci, ri), cell_list, (0, 0)):
                 for dc in [0, 1, -1]:
                     nci = ci + dc
@@ -270,7 +177,7 @@ class GameApp:
         for cell in cell_list:
             cell_c, cell_r = cell
             ci = cell_c + c
-            if ci < 0 or ci > self.c-1:
+            if ci < 0 or ci > self.c - 1:
                 return False
 
         return True
@@ -278,7 +185,7 @@ class GameApp:
     def calculate_best_place(self, block):
         shape_type = block['kind']
 
-        block_c,block_r = block['cr']
+        block_c, block_r = block['cr']
         index_id = {}
         index_score = {}
         index = 0
@@ -308,14 +215,10 @@ class GameApp:
         key_name = max(index_score, key=index_score.get)
 
         best_c = index_id[key_name]['cr'][0]
-        if abs(best_c-block_c)>range_length:
+        if abs(best_c - block_c) > range_length:
             left, right = get_range(best_c, self.c, range_length)
             change_c = random.randint(left, right)
             block['cr'] = (change_c, block_r)
         block['best'] = index_id[key_name]
 
         cal_move_order(block)
-
-
-game = GameApp(C, R)
-game.run()

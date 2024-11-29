@@ -9,3 +9,36 @@
 7. Python俄罗斯方块游戏暂停、数据文件保存；
 8. Python俄罗斯方块游戏初始化加载、重新开始和简单特效；
 9. Python俄罗斯方块游戏双人对战实现；
+
+## 采用opencv图像坐标系
+
+x, col
+y, row
+
+## 1. lesson-1 创建俄罗斯方块的形状
+
+## 2. lesson-2 俄罗斯方块在界面的生成及运动
+
+canvas中运动的block结构：
+```python
+block = {
+    "type": block_type,
+    "block": shapes_dict[block_type],
+    'location': [loc_x, loc_y]
+    }
+```
+
+## 3. lesson-3 俄罗斯方块的运动控制及碰撞检测
+
+形状碰撞检测
+形状停靠
+下落处理
+
+## 3，得分计算
+
+## 4. 暂停、保存数据文件
+
+## 5. 初始化加载、重新开始和简单特效
+
+## 6. 双人对战实现
+
