@@ -73,9 +73,10 @@ def main():
 
     # 生成一个俄罗斯方块
     block_type = random.choice(list(shapes_dict.keys()))
-    loc_x = random.randint(0, COLUMN - 1)
+    loc_x = COLUMN // 2
     loc_y = 0
     new_block = {
+        "type": block_type,
         "block": shapes_dict[block_type],
         'location': [loc_x, loc_y]  # 对应横纵坐标，以左上角为原点，水平向右为横坐标轴正方向，竖直向下为纵坐标轴正方向
     }
