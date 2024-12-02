@@ -1,3 +1,4 @@
+import json
 import tkinter as tk
 from tkinter import messagebox
 
@@ -8,6 +9,7 @@ scores = 0  # 记录分数
 current_block = None  # 当前方块
 block_list = [['' for _ in range(ROW)] for _ in range(COLUMN)]  # 初始化背景列表
 pause = False
+
 
 def check_move(block, direction=[0, 0]):
     """
@@ -172,6 +174,24 @@ def pause_action():
     pause = not pause
 
 
+def save_record():
+    with open("record.json", "w") as f:
+        json.dump(block_list, f)
+
+
+def load_record(canvas):
+    global block_list
+    with open("record.json", "r") as f:
+        block_list = json.load(f)
+    # 重新更新界面
+    for c_i in range(len(block_list)):
+        for r_i in range(len(block_list[0])):
+            if block_list[c_i][r_i] != "":
+                draw_cell_by_cr(canvas, c=c_i, r=r_i, color=shapes_dict[block_list[c_i][r_i]]["color"])
+            else:
+                draw_cell_by_cr(canvas, c=c_i, r=r_i, color=BACKGROUND_COLOR)
+
+
 def game_loop(canvas, win, score_label):
     win.update()
     global current_block, pause
@@ -215,6 +235,12 @@ def main():
     # 底部补充计分栏
     score_label = tk.Label(win, text="Scores: {}".format(scores))
     score_label.pack(side=tk.BOTTOM)
+
+    # 存档、读档
+    save_button = tk.Button(win, text="存档", command=save_record)
+    save_button.pack(side=tk.TOP)
+    load_button = tk.Button(win, text="读档", command=lambda: load_record(canvas))
+    load_button.pack(side=tk.TOP)
 
     # 增加暂停按钮
     pause_button = tk.Button(win, text="暂停/继续", command=pause_action)
