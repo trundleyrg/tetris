@@ -1,172 +1,58 @@
 import tkinter as tk
-import random
 
-cell_size = 30
-C = 12
-R = 20
-height = R * cell_size
-width = C * cell_size
+from config import *
+from utils import *
 
-FPS = 200  # 刷新页面的毫秒间隔
-
-# 定义各种形状
-SHAPES = {
-    "O": [(-1, -1), (0, -1), (-1, 0), (0, 0)],
-    "S": [(-1, 0), (0, 0), (0, -1), (1, -1)],
-    "T": [(-1, 0), (0, 0), (0, -1), (1, 0)],
-    "I": [(0, 1), (0, 0), (0, -1), (0, -2)],
-    "L": [(-1, 0), (0, 0), (-1, -1), (-1, -2)],
-    "J": [(-1, 0), (0, 0), (0, -1), (0, -2)],
-    "Z": [(-1, -1), (0, -1), (0, 0), (1, 0)],
-}
-
-# 定义各种形状的颜色
-SHAPESCOLOR = {
-    "O": "blue",
-    "S": "red",
-    "T": "yellow",
-    "I": "green",
-    "L": "purple",
-    "J": "orange",
-    "Z": "Cyan",
-}
+current_block = None
 
 
-def draw_cell_by_cr(canvas, c, r, color="#CCCCCC"):
+def check_move(block, block_list, direction=[0, 0]):
     """
-    :param canvas: 画板，用于绘制一个方块的Canvas对象
-    :param c: 方块所在列
-    :param r: 方块所在行
-    :param color: 方块颜色，默认为#CCCCCC，轻灰色
-    :return:
-    """
-    x0 = c * cell_size
-    y0 = r * cell_size
-    x1 = c * cell_size + cell_size
-    y1 = r * cell_size + cell_size
-    canvas.create_rectangle(x0, y0, x1, y1, fill=color, outline="white", width=2)
-
-
-# 绘制空白面板
-def draw_blank_board(canvas):
-    for ri in range(R):
-        for ci in range(C):
-            draw_cell_by_cr(canvas, ci, ri)
-
-
-def draw_cells(canvas, c, r, cell_list, color="#CCCCCC"):
-    """
-    绘制指定形状指定颜色的俄罗斯方块
-    :param canvas: 画板
-    :param r: 该形状设定的原点所在的行
-    :param c: 该形状设定的原点所在的列
-    :param cell_list: 该形状各个方格相对自身所处位置
-    :param color: 该形状颜色
-    :return:
-    """
-    for cell in cell_list:
-        cell_c, cell_r = cell
-        ci = cell_c + c
-        ri = cell_r + r
-        # 判断该位置方格在画板内部(画板外部的方格不再绘制)
-        if 0 <= ci < C and 0 <= ri < R:
-            draw_cell_by_cr(canvas, ci, ri, color)
-
-
-win = tk.Tk()
-canvas = tk.Canvas(win, width=width, height=height, )
-canvas.pack()
-
-draw_blank_board(canvas)
-
-block_list = []
-for i in range(R):
-    i_row = ['' for j in range(C)]
-    block_list.append(i_row)
-
-
-def draw_block_move(canvas, block, direction=[0, 0]):
-    """
-    绘制向指定方向移动后的俄罗斯方块
-    :param canvas: 画板
+    判断俄罗斯方块是否可以朝指定方向移动
     :param block: 俄罗斯方块对象
+    :param block_list: 背景列表
     :param direction: 俄罗斯方块移动方向
-    :return:
+    :return: boolean 是否可以朝指定方向移动
     """
-    shape_type = block['kind']
-    c, r = block['cr']
-    cell_list = block['cell_list']
-
-    # 移动前，先清除原有位置绘制的俄罗斯方块,也就是用背景色绘制原有的俄罗斯方块
-    draw_cells(canvas, c, r, cell_list)
-
-    dc, dr = direction
-    new_c, new_r = c+dc, r+dr
-    block['cr'] = [new_c, new_r]
-    # 在新位置绘制新的俄罗斯方块就好
-    draw_cells(canvas, new_c, new_r, cell_list, SHAPESCOLOR[shape_type])
-
-
-def generate_new_block():
-    # 随机生成新的俄罗斯方块
-
-    kind = random.choice(list(SHAPES.keys()))
-    # 对应横纵坐标，以左上角为原点，水平向右为x轴正方向，
-    # 竖直向下为y轴正方向，x对应横坐标，y对应纵坐标
-    cr = [C // 2, 0]
-    new_block = {
-        'kind': kind,  # 对应俄罗斯方块的类型
-        'cell_list': SHAPES[kind],
-        'cr': cr
-    }
-
-    return new_block
-
-
-def check_move(block, direction=[0, 0]):
-    """
-        判断俄罗斯方块是否可以朝制定方向移动
-        :param block: 俄罗斯方块对象
-        :param direction: 俄罗斯方块移动方向
-        :return: boolean 是否可以朝制定方向移动
-        """
-    cc, cr = block['cr']
-    cell_list = block['cell_list']
+    x, y = block['location']
+    cell_list = block['block']["shape"]
 
     for cell in cell_list:
         cell_c, cell_r = cell
-        c = cell_c + cc + direction[0]
-        r = cell_r + cr + direction[1]
+        cur_x = cell_c + x + direction[0]
+        cur_y = cell_r + y + direction[1]
+
+        # 边界检测
         # 判断该位置是否超出左右边界，以及下边界
         # 一般不判断上边界，因为俄罗斯方块生成的时候，可能有一部分在上边界之上还没有出来
-        if c < 0 or c >= C or r >= R:
+        if cur_x >= COLUMN or cur_x < 0 or cur_y >= ROW:
             return False
 
-        # 必须要判断r不小于0才行，具体原因你可以不加这个判断，试试会出现什么效果
-        if r >= 0 and block_list[r][c]:
+        # 判断y不小于0，且该位置是否有方块
+        if cur_y >= 0 and block_list[cur_x][cur_y]:
             return False
 
     return True
 
 
-def save_block_to_list(block):
-    shape_type = block['kind']
-    cc, cr = block['cr']
-    cell_list = block['cell_list']
+def save_block_to_list(block, block_list):
+    """将当前方块放置位置同步到背景列表"""
+    shape_type = block['type']
+    x, y = block['location']
+    cell_list = block["block"]["shape"]
 
     for cell in cell_list:
         cell_c, cell_r = cell
-        c = cell_c + cc
-        r = cell_r + cr
-        # block_list 在对应位置记下其类型
-        block_list[r][c] = shape_type
+        c = cell_c + x
+        r = cell_r + y
+        block_list[c][r] = shape_type  # block_list 在对应位置记下其类型
 
 
-def horizontal_move_block(event):
+def horizontal_move_block(event, canvas, block_list):
     """
     左右水平移动俄罗斯方块
     """
-    direction = [0, 0]
+    global current_block
     if event.keysym == 'Left':
         direction = [-1, 0]
     elif event.keysym == 'Right':
@@ -174,93 +60,108 @@ def horizontal_move_block(event):
     else:
         return
 
-    global current_block
-    if current_block is not None and check_move(current_block, direction):
+    if current_block is not None and check_move(current_block, block_list, direction=direction):
         draw_block_move(canvas, current_block, direction)
 
 
-def rotate_block(event):
+def rotate_block(event, canvas, block_list):
+    """旋转block"""
     global current_block
     if current_block is None:
         return
 
-    cell_list = current_block['cell_list']
+    cell_list = current_block['block']["shape"]
     rotate_list = []
     for cell in cell_list:
-        cell_c, cell_r = cell
-        rotate_cell = [cell_r, -cell_c]
+        x, y = cell
+        rotate_cell = [y, -x]
         rotate_list.append(rotate_cell)
 
     block_after_rotate = {
-        'kind': current_block['kind'],  # 对应俄罗斯方块的类型
-        'cell_list': rotate_list,
-        'cr': current_block['cr']
+        "type": current_block['type'],
+        "block": {"shape": rotate_list,
+                  "color": current_block["block"]['color']},  # 旋转后的shape
+        "location": current_block['location'],  # 以原点为中心旋转，原点位置不变
     }
 
-    if check_move(block_after_rotate):
-        cc, cr = current_block['cr']
-        draw_cells(canvas, cc, cr, current_block['cell_list'])
-        draw_cells(canvas, cc, cr, rotate_list, SHAPESCOLOR[current_block['kind']])
-        current_block = block_after_rotate
+    if check_move(block_after_rotate, block_list):
+        raw_x, raw_y = current_block['location']
+        draw_cells(canvas, column=raw_x, row=raw_y,
+                   block={"type": current_block["type"],
+                          "shape": current_block["block"]["shape"],
+                          "color": BACKGROUND_COLOR})  # 清除原来的形状
+        current_block = block_after_rotate  # 旋转有效时，替换全局变量
+        draw_cells(canvas, column=raw_x, row=raw_y, block=current_block["block"])
 
 
-def land(event):
+def land(event, canvas, block_list):
     global current_block
+    print("landing")
     if current_block is None:
         return
 
-    cell_list = current_block['cell_list']
-    cc, cr = current_block['cr']
-    min_height = R
+    cell_list = current_block['block']["shape"]
+    x, y = current_block['location']
+    min_height = ROW
     for cell in cell_list:
-        cell_c, cell_r = cell
-        c, r = cell_c + cc, cell_r + cr
-        if block_list[r][c]:
+        cur_x, cur_y = x + cell[0], y + cell[1]
+        if block_list[cur_x][cur_y]:
             return
         h = 0
-        for ri in range(r+1, R):
-            if block_list[ri][c]:
+        for yi in range(y + 1, ROW):
+            if block_list[cur_x][yi]:
                 break
             else:
                 h += 1
-        if h < min_height:
-            min_height = h
+        if h - cell[1] < min_height:  # 以原点为中心估算下落高度
+            min_height = h - cell[1]
 
     down = [0, min_height]
-    if check_move(current_block, down):
+    if check_move(current_block, block_list, direction=down):
         draw_block_move(canvas, current_block, down)
 
 
-def game_loop(win):
-    win.update()
+def game_loop(canvas, win, block_list):
     global current_block
     if current_block is None:
         new_block = generate_new_block()
-        # 新生成的俄罗斯方块需要先在生成位置绘制出来
-        draw_block_move(canvas, new_block)
+        draw_block_move(canvas, new_block)  # 绘制新生成的俄罗斯方块
         current_block = new_block
     else:
-        if check_move(current_block, [0, 1]):
+        if check_move(current_block, block_list, direction=[0, 1]):
             draw_block_move(canvas, current_block, [0, 1])
         else:
             # 无法移动，记入 block_list 中
-            save_block_to_list(current_block)
+            save_block_to_list(current_block, block_list)
             current_block = None
 
-    win.after(FPS, game_loop, win)
-
-canvas.focus_set() # 聚焦到canvas画板对象上
-canvas.bind("<KeyPress-Left>", horizontal_move_block)
-canvas.bind("<KeyPress-Right>", horizontal_move_block)
-canvas.bind("<KeyPress-Up>", rotate_block)
-canvas.bind("<KeyPress-Down>", land)
+    win.after(FPS, game_loop, canvas, win, block_list)
 
 
-current_block = None
+def main():
+    # 初始化
+    win = tk.Tk()
+    canvas = tk.Canvas(win, width=WIDTH, height=HEIGHT)
+    canvas.pack()
+
+    draw_blank_board(canvas, row=ROW, column=COLUMN)
+
+    # 初始化背景列表
+    block_list = [['' for _ in range(ROW)] for _ in range(COLUMN)]
+
+    canvas.focus_set()  # 聚焦到canvas画板对象上
+    canvas.bind("<KeyPress-Left>", lambda e: horizontal_move_block(e, canvas, block_list))
+    canvas.bind("<KeyPress-Right>", lambda e: horizontal_move_block(e, canvas, block_list))
+    canvas.bind("<KeyPress-Up>", lambda e: rotate_block(e, canvas, block_list))
+    canvas.bind("<KeyPress-Down>", lambda e: land(e, canvas, block_list))
+
+    current_block = None
+
+    win.update()
+    win.after(FPS, game_loop, canvas, win, block_list)  # 在FPS 毫秒后调用 game_loop方法
+
+    win.mainloop()
 
 
-win.update()
-win.after(FPS, game_loop, win)  # 在FPS 毫秒后调用 game_loop方法
-
-
-win.mainloop()
+if __name__ == '__main__':
+    main()
