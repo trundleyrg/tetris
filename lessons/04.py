@@ -6,7 +6,7 @@ from utils import *
 
 scores = 0  # 记录分数
 current_block = None  # 当前方块
-block_list = [['' for _ in range(ROW)] for _ in range(COLUMN)]  # 初始化背景列表
+background_list = [['' for _ in range(ROW)] for _ in range(COLUMN)]  # 初始化背景列表
 
 
 def check_move(block, direction=[0, 0]):
@@ -31,7 +31,7 @@ def check_move(block, direction=[0, 0]):
             return False
 
         # 判断y不小于0，且该位置是否有方块
-        if cur_y >= 0 and block_list[cur_x][cur_y]:
+        if cur_y >= 0 and background_list[cur_x][cur_y]:
             return False
 
     return True
@@ -39,7 +39,7 @@ def check_move(block, direction=[0, 0]):
 
 def save_block_to_list(block):
     """将当前方块放置位置同步到背景列表"""
-    global block_list
+    global background_list
     shape_type = block['type']
     x, y = block['location']
     cell_list = block["block"]["shape"]
@@ -48,7 +48,7 @@ def save_block_to_list(block):
         cell_c, cell_r = cell
         c = cell_c + x
         r = cell_r + y
-        block_list[c][r] = shape_type  # block_list 在对应位置记下其类型
+        background_list[c][r] = shape_type  # block_list 在对应位置记下其类型
 
 
 def horizontal_move_block(event, canvas):
@@ -107,11 +107,11 @@ def land(event, canvas):
     min_height = ROW
     for cell in cell_list:
         cur_x, cur_y = x + cell[0], y + cell[1]
-        if block_list[cur_x][cur_y]:
+        if background_list[cur_x][cur_y]:
             return
         h = 0
         for yi in range(y + 1, ROW):
-            if block_list[cur_x][yi]:
+            if background_list[cur_x][yi]:
                 break
             else:
                 h += 1
@@ -125,9 +125,9 @@ def land(event, canvas):
 
 def draw_board(canvas):
     """按照更新后的block_list绘制界面"""
-    for column_index in range(len(block_list)):
-        for row_index in range(len(block_list[0])):
-            cell_type = block_list[column_index][row_index]
+    for column_index in range(len(background_list)):
+        for row_index in range(len(background_list[0])):
+            cell_type = background_list[column_index][row_index]
             if cell_type == "":
                 draw_cell_by_cr(canvas, c=column_index, r=row_index, color=BACKGROUND_COLOR)  # 设置为背景色
             else:
@@ -136,14 +136,14 @@ def draw_board(canvas):
 
 def check_and_clear(canvas, score_label):
     """检查block_list中是否有满行，有则消除"""
-    global scores, block_list
+    global scores, background_list
 
     def check_row_complete(row):
         """检查一行是否已满"""
         return all(cell != '' for cell in row)
 
     # 转置数组，方便计算
-    block_list_copy = [[row[i] for row in block_list] for i in range(len(block_list[0]))]
+    block_list_copy = [[row[i] for row in background_list] for i in range(len(background_list[0]))]
 
     has_complete_row = False
     for row_index in range(len(block_list_copy)):
