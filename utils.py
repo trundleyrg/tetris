@@ -65,6 +65,7 @@ def draw_block_move(canvas, block, direction=[0, 0]):
 def generate_new_block():
     """随机生成新的俄罗斯方块"""
     block_type = random.choice(list(shapes_dict.keys()))
+    # block_type = "O"
     loc_x = COLUMN // 2
     loc_y = 0
     new_block = {
